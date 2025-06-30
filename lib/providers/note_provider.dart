@@ -6,7 +6,7 @@ import '../data/models/note.dart';
 // I will later add Firestore integration and CRUD logic.
 class NoteProvider extends ChangeNotifier {
   // List to hold notes locally
-  List<Note> _notes = [];
+  final List<Note> _notes = [];
 
   // Getter for external widgets to access notes
   List<Note> get notes => _notes;
