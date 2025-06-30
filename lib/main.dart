@@ -1,11 +1,11 @@
 // import packages/modules
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:note_taking_app/screens/home/splash_screen.dart';
 import 'package:provider/provider.dart';
 
 import 'firebase_options.dart';
 import 'providers/note_provider.dart';
-import 'screens/auth/login_screen.dart';
 
 void main() async {
   // Ensure binding before initializing Firebase
@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.deepPurple,
         ),
-        home: const LoginScreen(), // Initial screen
+        home: const SplashScreen(), // Initial screen
       ),
     );
   }
