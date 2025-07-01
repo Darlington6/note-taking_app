@@ -19,7 +19,7 @@ class Note {
     );
   }
 
-  Note copyWith({String? text}) {
+  Note copyWith({String? text, required String id}) {
     return Note(
       id: id,
       text: text ?? this.text,
