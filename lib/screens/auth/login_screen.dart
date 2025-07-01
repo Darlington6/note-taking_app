@@ -40,8 +40,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
     result.fold(
       (error) => _showSnackBar(error),
-      (success) {
-        _showSnackBar('Login successful!');
+      (success) async {
+        _showSnackBar('Login successful!', isSuccess: true);
+        await Future.delayed(const Duration(seconds: 1)); // Wait before navigating
+        if (!mounted) return;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const NotesScreen()),
@@ -52,10 +54,18 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = false);
   }
 
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+  // Shows a styled SnackBar for errors or success
+  void _showSnackBar(String message, {bool isSuccess = false}) {
+    final snackBar = SnackBar(
+      content: Text(message),
+      duration: const Duration(seconds: 1),
+      backgroundColor: isSuccess ? Colors.green : Colors.red,
+      behavior: SnackBarBehavior.floating,
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     );
+
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   @override

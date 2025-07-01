@@ -28,6 +28,20 @@ class _NotesScreenState extends State<NotesScreen> {
     });
   }
 
+  // Shows styled SnackBar (floating, top-right, green/red)
+  void _showSnackBar(String message, {bool isSuccess = false, SnackBarAction? action}) {
+    final snackBar = SnackBar(
+      content: Text(message),
+      duration: const Duration(seconds: 2),
+      backgroundColor: isSuccess ? Colors.green : Colors.red,
+      behavior: SnackBarBehavior.floating,
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      action: action,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
   // Show dialog to add a new note
   Future<void> _showAddNoteDialog(BuildContext context) async {
     final TextEditingController controller = TextEditingController();
@@ -48,7 +62,10 @@ class _NotesScreenState extends State<NotesScreen> {
               final text = controller.text.trim();
               if (text.isNotEmpty) {
                 await Provider.of<NoteProvider>(context, listen: false).addNote(text);
-                if (mounted) Navigator.pop(context);
+                if (mounted) {
+                  Navigator.pop(context);
+                  _showSnackBar('Note added successfully!', isSuccess: true); // Feedback
+                }
               }
             },
             child: const Text('Save'),
@@ -77,8 +94,12 @@ class _NotesScreenState extends State<NotesScreen> {
             onPressed: () async {
               final newText = controller.text.trim();
               if (newText.isNotEmpty && newText != note.text) {
-                await Provider.of<NoteProvider>(context, listen: false).updateNote(note.id, newText);
-                if (mounted) Navigator.pop(context);
+                await Provider.of<NoteProvider>(context, listen: false)
+                    .updateNote(note.id, newText);
+                if (mounted) {
+                  Navigator.pop(context);
+                  _showSnackBar('Note updated successfully!', isSuccess: true); // Feedback
+                }
               }
             },
             child: const Text('Update'),
@@ -99,8 +120,26 @@ class _NotesScreenState extends State<NotesScreen> {
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () async {
+              Navigator.pop(context); // Close dialog first
+
+              final deletedNote = note; // Keep backup
+
               await Provider.of<NoteProvider>(context, listen: false).deleteNote(note.id);
-              if (mounted) Navigator.pop(context);
+
+              if (!mounted) return;
+
+              // Show undo snackbar
+              _showSnackBar(
+                'Note deleted',
+                isSuccess: true,
+                action: SnackBarAction(
+                  label: 'Undo',
+                  textColor: Colors.white,
+                  onPressed: () async {
+                    await Provider.of<NoteProvider>(context, listen: false).restoreNote(deletedNote);
+                  },
+                ),
+              );
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             child: const Text('Delete'),
@@ -122,7 +161,7 @@ class _NotesScreenState extends State<NotesScreen> {
               ? const Center(
                   child: Text(
                     'Nothing here yet—tap ➕ to add a note.',
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                    style: TextStyle(fontSize: 16, color: Colors.black),
                   ),
                 )
               : ListView.builder(

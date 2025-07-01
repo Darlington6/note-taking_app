@@ -1,5 +1,4 @@
 // import packages/modules
-
 import 'package:flutter/material.dart';
 import 'package:note_taking_app/data/models/note.dart';
 import 'package:note_taking_app/data/services/firebase_service.dart';
@@ -56,5 +55,10 @@ class NoteProvider extends ChangeNotifier {
     await FirebaseService.deleteNote(id);
     isLoading = false;
     notifyListeners();
+  }
+
+  // Restores a deleted note (used for undo functionality)
+  Future<void> restoreNote(Note note) async {
+    await FirebaseService.restoreNote(note);
   }
 }

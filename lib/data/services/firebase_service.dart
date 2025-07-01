@@ -1,4 +1,4 @@
-// lib/core/services/firebase_service.dart
+// import packages/modules
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -85,6 +85,16 @@ class FirebaseService {
   // Delete a note
   static Future<void> deleteNote(String id) async {
     await _firestore.collection(kNotesCollection).doc(id).delete();
+  }
+
+  // Restore a deleted note using its full content (used in undo)
+  static Future<void> restoreNote(Note note) async {
+    final doc = _firestore.collection(kNotesCollection).doc(note.id); // Reuse same ID
+    await doc.set({
+      'text': note.text,
+      'timestamp': note.timestamp ?? FieldValue.serverTimestamp(),
+      'userId': currentUserId,
+    });
   }
 
   // Handles FirebaseAuth error codes into readable messages
