@@ -30,11 +30,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => NoteProvider()),
       ],
       child: MaterialApp(
-        title: 'Note Taking App',
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          primarySwatch: Colors.deepPurple,
-        ),
         home: const SplashScreen(), // Initial screen
       ),
     );

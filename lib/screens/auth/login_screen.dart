@@ -81,12 +81,15 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(
+          color: Colors.white, // Set back arrow color to white for enhanced visibility
+        ),
         centerTitle: true,
         title: const Text(
           'Login',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
-          backgroundColor: Colors.blueGrey,
+          backgroundColor: Colors.blueGrey[900],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),

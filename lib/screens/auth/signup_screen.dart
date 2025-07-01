@@ -1,5 +1,4 @@
 // import packages/modules
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:note_taking_app/data/services/firebase_service.dart';
@@ -80,12 +79,15 @@ class _SignupScreenState extends State<SignupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(
+          color: Colors.white, // Set back arrow color to white for enhanced visibility
+        ),
         centerTitle: true,
         title: const Text(
           'Sign Up',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
-          backgroundColor: Colors.blueGrey,
+          backgroundColor: Colors.blueGrey[900],
         ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),

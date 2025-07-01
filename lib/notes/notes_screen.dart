@@ -154,14 +154,24 @@ class _NotesScreenState extends State<NotesScreen> {
     final notes = Provider.of<NoteProvider>(context).notes;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Your Notes')),
+      appBar: AppBar(
+        iconTheme: IconThemeData(
+          color: Colors.white, // Set back arrow color to white for enhanced visibility
+        ),
+        centerTitle: true,
+        title: const Text(
+          'Your Notes',
+          style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.blueGrey[900],
+      ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : notes.isEmpty
               ? const Center(
                   child: Text(
                     'Nothing here yet—tap ➕ to add a note.',
-                    style: TextStyle(fontSize: 16, color: Colors.black),
+                    style: TextStyle(fontSize: 20),
                   ),
                 )
               : ListView.builder(
