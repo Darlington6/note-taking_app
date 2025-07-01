@@ -1,5 +1,6 @@
 // import packages/modules
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:note_taking_app/data/services/firebase_service.dart';
 import 'package:note_taking_app/utils/validators.dart';
@@ -68,6 +69,7 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   @override
+  // Clean up the controllers to free memory when the widget is disposed
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
@@ -77,7 +79,14 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Sign Up')),
+      appBar: AppBar(
+        centerTitle: true,
+        title: const Text(
+          'Sign Up',
+          style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.blueGrey,
+        ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -89,7 +98,7 @@ class _SignupScreenState extends State<SignupScreen> {
               keyboardType: TextInputType.emailAddress,
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
 
             // Password input
             TextField(
@@ -105,20 +114,37 @@ class _SignupScreenState extends State<SignupScreen> {
                 ? const CircularProgressIndicator()
                 : ElevatedButton(
                     onPressed: _signup,
-                    child: const Text('Sign Up'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green.shade700
+                    ),
+                    child: const Text('Sign Up', style: TextStyle(color: Colors.white),),
                   ),
 
             const SizedBox(height: 24),
 
             // Redirect to login
-            TextButton(
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => const LoginScreen()),
-                );
-              },
-              child: const Text('Already have an account? Login'),
+            RichText(
+              text: TextSpan(
+                text: 'Already have an account? ',
+                style: Theme.of(context).textTheme.bodyLarge,
+                children: [
+                  TextSpan(
+                    text: 'Log in',
+                    style: const TextStyle(
+                      color: Colors.deepOrange,
+                      fontWeight: FontWeight.bold,
+                      decoration: TextDecoration.none,
+                    ),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (_) => const LoginScreen()),
+                        );
+                      },
+                  ),
+                ],
+              ),
             ),
           ],
         ),

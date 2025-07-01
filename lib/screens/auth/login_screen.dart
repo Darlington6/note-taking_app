@@ -1,6 +1,7 @@
 // import packages/modules
 
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:note_taking_app/data/services/firebase_service.dart';
 import 'package:note_taking_app/utils/validators.dart';
 import 'package:note_taking_app/notes/notes_screen.dart';
@@ -69,6 +70,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   @override
+  // Clean up the controllers to free memory when the widget is disposed
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
@@ -78,7 +80,14 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
+      appBar: AppBar(
+        centerTitle: true,
+        title: const Text(
+          'Login',
+          style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.blueGrey,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -89,7 +98,7 @@ class _LoginScreenState extends State<LoginScreen> {
               keyboardType: TextInputType.emailAddress,
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
 
             TextField(
               controller: _passwordController,
@@ -103,20 +112,39 @@ class _LoginScreenState extends State<LoginScreen> {
                 ? const CircularProgressIndicator()
                 : ElevatedButton(
                     onPressed: _login,
-                    child: const Text('Login'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green.shade700
+                    ),
+                    child: const Text('Login', style: TextStyle(color: Colors.white),),
                   ),
 
             const SizedBox(height: 24),
 
-            TextButton(
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => const SignupScreen()),
-                );
-              },
-              child: const Text("Don't have an account yet? Sign up"),
+            // Redirect to Notes Screen
+            RichText(
+              text: TextSpan(
+                text: "Don't have an account yet? ",
+                style: Theme.of(context).textTheme.bodyLarge,
+                children: [
+                  TextSpan(
+                    text: "Sign up",
+                    style: const TextStyle(
+                      color: Colors.deepOrange,
+                      fontWeight: FontWeight.bold,
+                      decoration: TextDecoration.none,
+                    ),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (_) => const SignupScreen()),
+                        );
+                      },
+                  ),
+                ],
+              ),
             ),
+
           ],
         ),
       ),
