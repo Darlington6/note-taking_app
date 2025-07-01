@@ -18,15 +18,14 @@ class _NotesScreenState extends State<NotesScreen> {
   @override
   void initState() {
     super.initState();
-    _loadNotes();
-  }
 
-  // Fetch notes when screen is first loaded
-  Future<void> _loadNotes() async {
-    await Provider.of<NoteProvider>(context, listen: false).fetchNotes();
-    if (mounted) {
-      setState(() => _isLoading = false);
-    }
+    // Schedule note listening after the first frame is rendered
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<NoteProvider>(context, listen: false).listenToNotes();
+      if (mounted) {
+        setState(() => _isLoading = false); // Hide loader quickly
+      }
+    });
   }
 
   // Show dialog to add a new note

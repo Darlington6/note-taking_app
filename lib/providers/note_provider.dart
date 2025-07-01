@@ -1,63 +1,60 @@
 // import packages/modules
+
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import '../data/models/note.dart';
+import 'package:note_taking_app/data/models/note.dart';
+import 'package:note_taking_app/data/services/firebase_service.dart';
 
-// NoteProvider handles Firestore CRUD for notes.
+// Provider to manage state and interactions with notes (CRUD).
 class NoteProvider extends ChangeNotifier {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
+  // Private list of notes
   List<Note> _notes = [];
   List<Note> get notes => _notes;
 
-  // Fetch all notes for the current user
-  Future<void> fetchNotes() async {
-    try {
-      final snapshot = await _firestore.collection('notes').get();
+  bool isLoading = false;
 
-      _notes = snapshot.docs.map((doc) {
-        return Note.fromMap(doc.data()).copyWith(id: doc.id);
-      }).toList();
+  // Start listening to the user's notes from Firestore.
+  void listenToNotes() {
+    isLoading = true;
+    notifyListeners(); // Notify loading state
 
+    FirebaseService.getUserNotesStream().listen((fetchedNotes) {
+      _notes = fetchedNotes;
+      isLoading = false;
       notifyListeners();
-    } catch (e) {
-      debugPrint('Error fetching notes: $e');
-    }
+    });
   }
 
-  // Add a new note to Firestore
+  // Adds a new note, then notify UI to update.
   Future<void> addNote(String text) async {
-    try {
-      final doc = await _firestore.collection('notes').add({'text': text});
-      _notes.add(Note(id: doc.id, text: text));
-      notifyListeners();
-    } catch (e) {
-      debugPrint('Error adding note: $e');
-    }
+    if (text.trim().isEmpty) return;
+
+    isLoading = true;
+    notifyListeners();
+
+    await FirebaseService.addNote(text);
+    isLoading = false;
+    notifyListeners();
   }
 
-  // Update an existing note in Firestore
+  // Updates an existing note and notifies UI.
   Future<void> updateNote(String id, String newText) async {
-    try {
-      await _firestore.collection('notes').doc(id).update({'text': newText});
-      final index = _notes.indexWhere((note) => note.id == id);
-      if (index != -1) {
-        _notes[index] = _notes[index].copyWith(text: newText, id: '');
-        notifyListeners();
-      }
-    } catch (e) {
-      debugPrint('Error updating note: $e');
-    }
+    if (newText.trim().isEmpty) return;
+
+    isLoading = true;
+    notifyListeners();
+
+    await FirebaseService.updateNote(id, newText);
+    isLoading = false;
+    notifyListeners();
   }
 
-  // Delete a note from Firestore
+  // Deletes a note by ID and updates UI state.
   Future<void> deleteNote(String id) async {
-    try {
-      await _firestore.collection('notes').doc(id).delete();
-      _notes.removeWhere((note) => note.id == id);
-      notifyListeners();
-    } catch (e) {
-      debugPrint('Error deleting note: $e');
-    }
+    isLoading = true;
+    notifyListeners();
+
+    await FirebaseService.deleteNote(id);
+    isLoading = false;
+    notifyListeners();
   }
 }

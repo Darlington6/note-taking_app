@@ -1,6 +1,8 @@
 // import packages/modules
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
+import 'package:note_taking_app/data/services/firebase_service.dart';
+import 'package:note_taking_app/utils/validators.dart';
 import 'package:note_taking_app/notes/notes_screen.dart';
 import 'signup_screen.dart';
 
@@ -12,69 +14,44 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  // Controllers to capture email and password input
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  // Local UI state for showing loader
   bool _isLoading = false;
 
-  // Logs in the user with Firebase Authentication
+  // Login logic using FirebaseService
   Future<void> _login() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
-    // Input validation
-    if (email.isEmpty || password.isEmpty) {
-      _showSnackBar('Please enter both email and password');
+    final emailError = validateEmail(email);
+    final passwordError = validatePassword(password);
+
+    if (emailError != null || passwordError != null) {
+      _showSnackBar(emailError ?? passwordError!);
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
-    try {
-      // Attempt to sign in using Firebase Auth
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+    final result = await FirebaseService.loginWithEmail(email, password);
 
-      // On success, navigate to the main notes interface
-      if (mounted) {
+    if (!mounted) return;
+
+    result.fold(
+      (error) => _showSnackBar(error),
+      (success) {
+        _showSnackBar('Login successful!');
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const NotesScreen()),
         );
-      }
+      },
+    );
 
-      _showSnackBar('Login successful!');
-    } on FirebaseAuthException catch (e) {
-      // Handle known login errors
-      String message;
-      if (e.code == 'user-not-found') {
-        message = 'No account found for that email.';
-      } else if (e.code == 'wrong-password') {
-        message = 'Incorrect password. Please try again.';
-      } else if (e.code == 'invalid-email') {
-        message = 'Please enter a valid email address.';
-      } else {
-        message = 'Login failed. Please try again later.';
-      }
-
-      _showSnackBar(message);
-    } catch (e) {
-      // Fallback for unknown errors
-      _showSnackBar('Something went wrong. Try again.');
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
+    setState(() => _isLoading = false);
   }
 
-  // Displays a message using a SnackBar
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
@@ -83,7 +60,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
-    // Clean up controllers
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -93,11 +69,10 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Login')),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
-            // Email input
             TextField(
               controller: _emailController,
               decoration: const InputDecoration(labelText: 'Email'),
@@ -106,7 +81,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
             const SizedBox(height: 16),
 
-            // Password input
             TextField(
               controller: _passwordController,
               decoration: const InputDecoration(labelText: 'Password'),
@@ -115,7 +89,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
             const SizedBox(height: 24),
 
-            // Login button or loader
             _isLoading
                 ? const CircularProgressIndicator()
                 : ElevatedButton(
@@ -125,7 +98,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
             const SizedBox(height: 24),
 
-            // Navigation to Signup
             TextButton(
               onPressed: () {
                 Navigator.pushReplacement(
