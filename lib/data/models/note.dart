@@ -22,13 +22,14 @@ class Note {
   }
 
   // Create a Note from Firestore map
-  factory Note.fromMap(Map<String, dynamic> map) {
+  factory Note.fromMap(Map<String, dynamic> map, String docId) {
     return Note(
-      id: map['id'] ?? '',
+      id: docId, // get ID from Firestore document ID
       text: map['text'] ?? '',
-      timestamp: map['timestamp'], // Extract timestamp from Firestore
+      timestamp: map['timestamp'],
     );
   }
+
 
   // Clone note with optional updated fields
   Note copyWith({String? id, String? text, Timestamp? timestamp}) {

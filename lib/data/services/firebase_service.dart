@@ -15,12 +15,17 @@ class FirebaseService {
   static String get currentUserId => _auth.currentUser?.uid ?? '';
 
   // Signup new user and handle errors gracefully
-  static Future<Either<String, UserCredential>> signUpWithEmail(String email, String password) async {
+  static Future<Either<String, UserCredential>> signUpWithEmail(
+      String email, String password) async {
     try {
       final credential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+
+      // Store user profile in Firestore
+      await saveUserProfile(credential.user!.uid, email);
+
       return Right(credential);
     } on FirebaseAuthException catch (e) {
       return Left(_handleAuthError(e));
@@ -57,17 +62,19 @@ class FirebaseService {
         .orderBy('timestamp', descending: true)
         .snapshots()
         .map((snapshot) =>
-            snapshot.docs.map((doc) => Note.fromMap(doc.data()).copyWith(id: doc.id)).toList());
+            snapshot.docs.map((doc) => Note.fromMap(doc.data(), doc.id)).toList());
   }
 
+
   // Add a note for the current user
-  static Future<String?> addNote(String text) async {
+  static Future<String> addNote(Note note) async {
     try {
       final doc = await _firestore.collection(kNotesCollection).add({
-        'text': text,
+        'text': note.text,
         'userId': currentUserId,
-        'timestamp': FieldValue.serverTimestamp(),
+        'timestamp': note.timestamp ?? FieldValue.serverTimestamp(),
       });
+
       return doc.id;
     } catch (e) {
       rethrow;
@@ -113,5 +120,14 @@ class FirebaseService {
       default:
         return 'Authentication failed. Please try again.';
     }
+  }
+
+  // Save users' sign up credentials to Firestore
+  static Future<void> saveUserProfile(String uid, String email) async {
+    await _firestore.collection('users').doc(uid).set({
+      'email': email,
+      'password': 'Encrypted by FirebaseAuth', // Do not store raw passwords
+      'timestamp': FieldValue.serverTimestamp(),
+    });
   }
 }

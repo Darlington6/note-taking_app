@@ -23,41 +23,23 @@ class NoteProvider extends ChangeNotifier {
     });
   }
 
-  // Adds a new note, then notify UI to update.
-  Future<void> addNote(String text) async {
-    if (text.trim().isEmpty) return;
-
-    isLoading = true;
-    notifyListeners();
-
-    await FirebaseService.addNote(text);
-    isLoading = false;
-    notifyListeners();
+  // Adds a new note (no need to update list manually, Firestore stream will handle it)
+  Future<void> addNote(Note note) async {
+    await FirebaseService.addNote(note);
   }
 
-  // Updates an existing note and notifies UI.
+  // Updates an existing note (FireStore stream will auto-update UI)
   Future<void> updateNote(String id, String newText) async {
     if (newText.trim().isEmpty) return;
-
-    isLoading = true;
-    notifyListeners();
-
     await FirebaseService.updateNote(id, newText);
-    isLoading = false;
-    notifyListeners();
   }
 
-  // Deletes a note by ID and updates UI state.
+  // Deletes a note by ID (UI will reflect via stream)
   Future<void> deleteNote(String id) async {
-    isLoading = true;
-    notifyListeners();
-
     await FirebaseService.deleteNote(id);
-    isLoading = false;
-    notifyListeners();
   }
 
-  // Restores a deleted note (used for undo functionality)
+  // Restores a deleted note (undo functionality)
   Future<void> restoreNote(Note note) async {
     await FirebaseService.restoreNote(note);
   }

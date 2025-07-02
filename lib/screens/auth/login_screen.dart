@@ -118,7 +118,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green.shade700
                     ),
-                    child: const Text('Login', style: TextStyle(color: Colors.white),),
+                    child: const Text(
+                      'Login', 
+                      style: TextStyle(
+                        color: Colors.white, 
+                        fontWeight: FontWeight.bold,
+                        ),
+                        ),
                   ),
 
             const SizedBox(height: 24),

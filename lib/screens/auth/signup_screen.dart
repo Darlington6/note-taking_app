@@ -85,7 +85,10 @@ class _SignupScreenState extends State<SignupScreen> {
         centerTitle: true,
         title: const Text(
           'Sign Up',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Colors.white, 
+            fontWeight: FontWeight.bold,
+            ),
           ),
           backgroundColor: Colors.blueGrey[900],
         ),

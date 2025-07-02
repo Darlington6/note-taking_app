@@ -1,4 +1,5 @@
 // import packages/modules
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -28,7 +29,7 @@ class _NotesScreenState extends State<NotesScreen> {
     });
   }
 
-  // Shows styled SnackBar (floating, top-right, green/red)
+  // Shows styled SnackBar (floating top-right, green/red)
   void _showSnackBar(String message, {bool isSuccess = false, SnackBarAction? action}) {
     final snackBar = SnackBar(
       content: Text(message),
@@ -52,19 +53,32 @@ class _NotesScreenState extends State<NotesScreen> {
         title: const Text('Add Note'),
         content: TextField(
           controller: controller,
-          maxLines: 4,
+          minLines: 1,
+          maxLines: null,
           decoration: const InputDecoration(hintText: 'Enter your note'),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
           ElevatedButton(
             onPressed: () async {
               final text = controller.text.trim();
               if (text.isNotEmpty) {
-                await Provider.of<NoteProvider>(context, listen: false).addNote(text);
+                final newNote = Note(
+                  id: '',
+                  text: text,
+                  timestamp: Timestamp.fromDate(DateTime.now()),
+                );
+
+
+                await Provider.of<NoteProvider>(context, listen: false)
+                    .addNote(newNote);
+
                 if (mounted) {
                   Navigator.pop(context);
-                  _showSnackBar('Note added successfully!', isSuccess: true); // Feedback
+                  _showSnackBar('Note added successfully!', isSuccess: true);
                 }
               }
             },
@@ -74,6 +88,7 @@ class _NotesScreenState extends State<NotesScreen> {
       ),
     );
   }
+
 
   // Show dialog to edit an existing note
   Future<void> _showEditNoteDialog(BuildContext context, Note note) async {
@@ -85,7 +100,8 @@ class _NotesScreenState extends State<NotesScreen> {
         title: const Text('Edit Note'),
         content: TextField(
           controller: controller,
-          maxLines: 4,
+          minLines: 1,
+          maxLines: null,
           decoration: const InputDecoration(hintText: 'Edit your note'),
         ),
         actions: [
@@ -181,7 +197,7 @@ class _NotesScreenState extends State<NotesScreen> {
                     final note = notes[index];
                     return Card(
                       elevation: 2,
-                      margin: const EdgeInsets.only(bottom: 12),
+                      margin: const EdgeInsets.only(bottom: 24),
                       child: ListTile(
                         title: Text(note.text),
                         trailing: Row(

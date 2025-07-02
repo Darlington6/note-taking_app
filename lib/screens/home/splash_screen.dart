@@ -53,7 +53,13 @@ class SplashScreen extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.deepOrange
                     ),
-                  child: const Text('Get Started', style: TextStyle(color: Colors.white),),
+                  child: const Text(
+                    'Get Started', 
+                    style: TextStyle(
+                      color: Colors.white, 
+                      fontWeight: FontWeight.bold,
+                      ),
+                      ),
                 ),
               ),
             ],
