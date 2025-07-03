@@ -127,20 +127,21 @@ class _NotesScreenState extends State<NotesScreen> {
 
   // Ask for confirmation before deleting
   void _confirmDelete(BuildContext context, Note note) {
+    final noteProvider = Provider.of<NoteProvider>(context, listen: false); // Capture here
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Note'),
         content: const Text('Are you sure you want to delete this note?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel', style: TextStyle(color: Colors.black),)),
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context); // Close dialog first
 
               final deletedNote = note; // Keep backup
 
-              await Provider.of<NoteProvider>(context, listen: false).deleteNote(note.id);
+              await noteProvider.deleteNote(note.id); // Use captured reference
 
               if (!mounted) return;
 
@@ -152,13 +153,16 @@ class _NotesScreenState extends State<NotesScreen> {
                   label: 'Undo',
                   textColor: Colors.white,
                   onPressed: () async {
-                    await Provider.of<NoteProvider>(context, listen: false).restoreNote(deletedNote);
+                    await noteProvider.restoreNote(deletedNote); // Use captured provider
                   },
                 ),
               );
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: const Text(
+              'Delete',
+              style: TextStyle(color: Colors.white),
+              ),
           ),
         ],
       ),
@@ -218,8 +222,12 @@ class _NotesScreenState extends State<NotesScreen> {
                   },
                 ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.lightBlue,
         onPressed: () => _showAddNoteDialog(context),
-        child: const Icon(Icons.add),
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+          ),
       ),
     );
   }
