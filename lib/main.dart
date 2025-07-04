@@ -1,6 +1,9 @@
 // import packages/modules
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:note_taking_app/notes/notes_screen.dart';
+import 'package:note_taking_app/screens/auth/login_screen.dart';
+import 'package:note_taking_app/screens/auth/signup_screen.dart';
 import 'package:note_taking_app/screens/home/splash_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -25,13 +28,21 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      // Register all providers here
+      // Providers here
       providers: [
         ChangeNotifierProvider(create: (_) => NoteProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: const SplashScreen(), // Initial screen
+
+        initialRoute: "splash", // Start with the splash screen
+        // Define named routes for navigation
+        routes: {
+          'splash': (_) => const SplashScreen(),
+          'signup': (_) => const SignupScreen(),
+          'login': (_) => const LoginScreen(),
+          'notes': (_) => const NotesScreen(),
+        },
       ),
     );
   }

@@ -1,6 +1,7 @@
 // import packages/modules
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:note_taking_app/data/services/firebase_service.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/note_provider.dart';
@@ -15,6 +16,8 @@ class NotesScreen extends StatefulWidget {
 
 class _NotesScreenState extends State<NotesScreen> {
   bool _isLoading = true;
+  late NoteProvider _noteProvider;
+
 
   @override
   void initState() {
@@ -29,18 +32,59 @@ class _NotesScreenState extends State<NotesScreen> {
     });
   }
 
-  // Shows styled SnackBar (floating top-right, green/red)
+  // Safely access the NoteProvider once the widget is in the widget tree.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _noteProvider = Provider.of<NoteProvider>(context, listen: false);   // This avoids context-related errors when calling Provider in dispose().
+  }
+
+
+  // Shows styled SnackBar
   void _showSnackBar(String message, {bool isSuccess = false, SnackBarAction? action}) {
     final snackBar = SnackBar(
       content: Text(message),
       duration: const Duration(seconds: 2),
       backgroundColor: isSuccess ? Colors.green : Colors.red,
-      behavior: SnackBarBehavior.floating,
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      behavior: SnackBarBehavior.fixed,
       action: action,
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  // Hnadle log out here
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirm Logout'),
+        content: const Text('Are you sure you want to log out?'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel', style: TextStyle(color: Colors.black)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.of(context).pop(); // Close the dialog first
+              Provider.of<NoteProvider>(context, listen: false).cancelNoteSubscription(); // Stop listening
+              await FirebaseService.logoutUser();
+              if (!mounted) return;
+              Navigator.pushReplacementNamed(context, 'login'); // Move back to login screen upon logout
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30), // Fully rounded button
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+            child: const Text('Logout', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
   }
 
   // Show dialog to add a new note
@@ -175,15 +219,32 @@ class _NotesScreenState extends State<NotesScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        iconTheme: IconThemeData(
-          color: Colors.white, // Set back arrow color to white for enhanced visibility
-        ),
+        automaticallyImplyLeading: false, // Hide back arrow
         centerTitle: true,
         title: const Text(
           'Your Notes',
           style: TextStyle(color: Colors.white),
           ),
           backgroundColor: Colors.blueGrey[900],
+          actions: [
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert, color: Colors.white),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30), // Rounded menu shape
+              ),
+              onSelected: (value) {
+                if (value == 'logout') {
+                  _showLogoutDialog(context);
+                }
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: 'logout',
+                  child: Center(child: Text('Logout')),
+                ),
+              ],
+            ),
+          ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -194,14 +255,16 @@ class _NotesScreenState extends State<NotesScreen> {
                     style: TextStyle(fontSize: 20),
                   ),
                 )
+                // Display as a ListView
               : ListView.builder(
                   padding: const EdgeInsets.all(16),
-                  itemCount: notes.length,
+                  itemCount: notes.length, // However long the notes list is
                   itemBuilder: (context, index) {
                     final note = notes[index];
                     return Card(
                       elevation: 2,
                       margin: const EdgeInsets.only(bottom: 24),
+                      // Display as a LisTile
                       child: ListTile(
                         title: Text(note.text),
                         trailing: Row(
@@ -221,14 +284,27 @@ class _NotesScreenState extends State<NotesScreen> {
                     );
                   },
                 ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.lightBlue,
-        onPressed: () => _showAddNoteDialog(context),
-        child: const Icon(
-          Icons.add,
-          color: Colors.white,
+      floatingActionButton: Stack(
+        children: [
+          // FAB for Add Note (bottom-right)
+          Positioned(
+            bottom: 16,
+            right: 16,
+            child: FloatingActionButton(
+              backgroundColor: Colors.teal,
+              heroTag: 'addNote',
+              onPressed: () => _showAddNoteDialog(context),
+              child: const Icon(Icons.add, color: Colors.white,),
+            ),
           ),
+        ],
       ),
     );
+  }
+  // Cancel the Firestore notes listener when this screen is disposed.
+  @override
+  void dispose() {
+    _noteProvider.cancelNoteSubscription();
+    super.dispose();   // This prevents memory leaks and ensures the app doesn't keep listening after logout.
   }
 }

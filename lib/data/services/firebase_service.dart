@@ -3,7 +3,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:dartz/dartz.dart';
-import 'package:note_taking_app/core/constants.dart';
 import 'package:note_taking_app/data/models/note.dart';
 
 // Centralized Firebase service class for Authentication & Firestore.
@@ -22,6 +21,11 @@ class FirebaseService {
         email: email,
         password: password,
       );
+
+      final user = credential.user;
+      if (user == null) {
+        return const Left('Signup failed. No user found.');
+      }
 
       // Store user profile in Firestore
       await saveUserProfile(credential.user!.uid, email);
@@ -56,34 +60,47 @@ class FirebaseService {
 
   // Get stream of notes for the current user, ordered by timestamp
   static Stream<List<Note>> getUserNotesStream() {
+    final userId = currentUserId;
+    if (userId.isEmpty) return const Stream.empty();
+
     return _firestore
-        .collection(kNotesCollection)
-        .where('userId', isEqualTo: currentUserId)
+        .collection('users')
+        .doc(userId)
+        .collection('notes')
         .orderBy('timestamp', descending: true)
         .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map((doc) => Note.fromMap(doc.data(), doc.id)).toList());
+        .map((snapshot) => snapshot.docs
+            .map((doc) => Note.fromMap(doc.data(), doc.id))
+            .toList());
   }
-
 
   // Add a note for the current user
   static Future<String> addNote(Note note) async {
-    try {
-      final doc = await _firestore.collection(kNotesCollection).add({
-        'text': note.text,
-        'userId': currentUserId,
-        'timestamp': note.timestamp ?? FieldValue.serverTimestamp(),
-      });
+    final userId = currentUserId;
+    final noteRef = _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('notes')
+        .doc();
 
-      return doc.id;
-    } catch (e) {
-      rethrow;
-    }
+    await noteRef.set({
+      'userId': userId,
+      'text': note.text,
+      'timestamp': note.timestamp ?? FieldValue.serverTimestamp(),
+    });
+
+    return noteRef.id;
   }
 
   // Update an existing note
   static Future<void> updateNote(String id, String text) async {
-    await _firestore.collection(kNotesCollection).doc(id).update({
+    final userId = currentUserId;
+    await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('notes')
+        .doc(id)
+        .update({
       'text': text,
       'timestamp': FieldValue.serverTimestamp(),
     });
@@ -91,16 +108,28 @@ class FirebaseService {
 
   // Delete a note
   static Future<void> deleteNote(String id) async {
-    await _firestore.collection(kNotesCollection).doc(id).delete();
+    final userId = currentUserId;
+    await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('notes')
+        .doc(id)
+        .delete();
   }
 
   // Restore a deleted note using its full content (used in undo)
   static Future<void> restoreNote(Note note) async {
-    final doc = _firestore.collection(kNotesCollection).doc(note.id); // Reuse same ID
+    final userId = currentUserId;
+    final doc = _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('notes')
+        .doc(note.id);
+
     await doc.set({
       'text': note.text,
       'timestamp': note.timestamp ?? FieldValue.serverTimestamp(),
-      'userId': currentUserId,
+      'userId': userId,
     });
   }
 
@@ -117,6 +146,8 @@ class FirebaseService {
         return 'The password provided is too weak.';
       case 'invalid-email':
         return 'Please enter a valid email address.';
+      case 'invalid-credential':
+        return 'Invalid credentials. This account may have been deleted or expired.';
       default:
         return 'Authentication failed. Please try again.';
     }

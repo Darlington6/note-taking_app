@@ -3,7 +3,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:note_taking_app/data/services/firebase_service.dart';
 import 'package:note_taking_app/utils/validators.dart';
-import 'login_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -13,6 +12,9 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
+
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  
   // Controllers for user input
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -21,6 +23,8 @@ class _SignupScreenState extends State<SignupScreen> {
 
   // Sign up logic using FirebaseService
   Future<void> _signup() async {
+    if (!_formKey.currentState!.validate()) return; // This triggers all validators
+
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
@@ -44,25 +48,20 @@ class _SignupScreenState extends State<SignupScreen> {
         _showSnackBar('Signup successful. Please log in.', isSuccess: true);
         await Future.delayed(const Duration(seconds: 1)); // Wait before navigating
         if (!mounted) return;
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const LoginScreen()),
-        );
+        Navigator.pushReplacementNamed(context, 'login');
       },
     );
 
     setState(() => _isLoading = false);
   }
 
-  // Shows styled SnackBar (floating, top-right, green/red)
+  // Shows styled SnackBar for errors or success
   void _showSnackBar(String message, {bool isSuccess = false}) {
     final snackBar = SnackBar(
       content: Text(message),
       duration: const Duration(seconds: 1),
       backgroundColor: isSuccess ? Colors.green : Colors.red,
-      behavior: SnackBarBehavior.floating,
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      behavior: SnackBarBehavior.fixed,
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
@@ -78,6 +77,7 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         iconTheme: IconThemeData(
           color: Colors.white, // Set back arrow color to white for enhanced visibility
@@ -94,64 +94,69 @@ class _SignupScreenState extends State<SignupScreen> {
         ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
-        child: Column(
-          children: [
-            // Email input
-            TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
-              keyboardType: TextInputType.emailAddress,
-            ),
-
-            const SizedBox(height: 24),
-
-            // Password input
-            TextField(
-              controller: _passwordController,
-              decoration: const InputDecoration(labelText: 'Password'),
-              obscureText: true,
-            ),
-
-            const SizedBox(height: 24),
-
-            // Button or spinner
-            _isLoading
-                ? const CircularProgressIndicator()
-                : ElevatedButton(
-                    onPressed: _signup,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green.shade700
-                    ),
-                    child: const Text('Sign Up', style: TextStyle(color: Colors.white),),
-                  ),
-
-            const SizedBox(height: 24),
-
-            // Redirect to login
-            RichText(
-              text: TextSpan(
-                text: 'Already have an account? ',
-                style: Theme.of(context).textTheme.bodyLarge,
-                children: [
-                  TextSpan(
-                    text: 'Log in',
-                    style: const TextStyle(
-                      color: Colors.deepOrange,
-                      fontWeight: FontWeight.bold,
-                      decoration: TextDecoration.none,
-                    ),
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (_) => const LoginScreen()),
-                        );
-                      },
-                  ),
-                ],
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                controller: _emailController,
+                decoration: const InputDecoration(labelText: 'Email'),
+                keyboardType: TextInputType.emailAddress,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) return 'Email is required';
+                  return validateEmail(value);
+                },
               ),
-            ),
-          ],
+          
+              const SizedBox(height: 24),
+          
+              TextFormField(
+                  controller: _passwordController,
+                  decoration: const InputDecoration(labelText: 'Password'),
+                  obscureText: true,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) return 'Password is required';
+                    return validatePassword(value);
+                  },
+                ),
+              const SizedBox(height: 24),
+          
+              // Button or spinner
+              _isLoading
+                  ? const CircularProgressIndicator()
+                  : ElevatedButton(
+                      onPressed: _signup,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green.shade700
+                      ),
+                      child: const Text('Sign Up', style: TextStyle(color: Colors.white),),
+                    ),
+          
+              const SizedBox(height: 24),
+          
+              // Redirect to login
+              RichText(
+                text: TextSpan(
+                  text: 'Already have an account? ',
+                  style: Theme.of(context).textTheme.bodyLarge,
+                  children: [
+                    TextSpan(
+                      text: 'Log in',
+                      style: const TextStyle(
+                        color: Colors.deepOrange,
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.none,
+                      ),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          Navigator.pushNamed(context, 'login');
+                        },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
