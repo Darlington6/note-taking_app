@@ -106,6 +106,30 @@ The app passes all static analysis checks:
 
 ## Screenshots (Portrait vs. Landscape)
 
+1. Splash Screen in Portrait
+![Splash Screen in Portrait](./screenshots/splash-screen-portrait.png)
+
+2. Splash Screen in Lanscape
+![Splash Screen in Lanscape](./screenshots/splash-screen-landscape.png)
+
+3. Signup Screen in Portrait
+![Signup Screen in Portrait](./screenshots/signup-screen-portrait.png)
+
+4. Signup Screen in Lanscape
+![Signup Screen in Lanscape](./screenshots/signup-screen-landscape.png)
+
+5. Login Screen in Portrait
+![Login Screen in Portrait](./screenshots/login-screen-portrait.png)
+
+6. Login Screen in Lanscape
+![Login Screen in Lanscape](./screenshots/login-screen-landscape.png)
+
+7. Notes Screen in Portrait
+![Notes Screen in Portrait](./screenshots/notes-screen-portrait.png)
+
+8. Notes Screen in Lanscape
+![Notes Screen in Lanscape](./screenshots/notes-screen-landscape.png)
+
 ---
 
 ## Author
