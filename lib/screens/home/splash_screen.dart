@@ -1,6 +1,7 @@
 // import packages/modules
 
 import 'package:flutter/material.dart';
+import 'package:note_taking_app/core/constants.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
@@ -35,7 +36,7 @@ class SplashScreen extends StatelessWidget {
               const SizedBox(height: 24),
 
               const Text(
-                'Your ultimate companion for planning, organizing, and keeping your notes in one place.',
+                kWelcomeText, // From constants.dart
                 style: TextStyle(fontSize: 18),
               ),
 

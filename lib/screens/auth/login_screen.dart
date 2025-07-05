@@ -1,6 +1,7 @@
 // import packages/modules
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:note_taking_app/core/constants.dart';
 import 'package:note_taking_app/data/services/firebase_service.dart';
 import 'package:note_taking_app/utils/validators.dart';
 
@@ -57,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void _showSnackBar(String message, {bool isSuccess = false}) {
     final snackBar = SnackBar(
       content: Text(message),
-      backgroundColor: isSuccess ? Colors.green : Colors.red,
+      backgroundColor: isSuccess ? kSuccessColor : kErrorColor,
       duration: const Duration(seconds: 2),
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);

@@ -1,6 +1,7 @@
 // import packages/modules
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:note_taking_app/core/constants.dart';
 import 'package:note_taking_app/data/services/firebase_service.dart';
 import 'package:provider/provider.dart';
 
@@ -52,7 +53,7 @@ class _NotesScreenState extends State<NotesScreen> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  // Hnadle log out here
+  // Handle log out here
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -251,7 +252,7 @@ class _NotesScreenState extends State<NotesScreen> {
           : notes.isEmpty
               ? const Center(
                   child: Text(
-                    'Nothing here yet—tap ➕ to add a note.',
+                    kHintText, // From constants.dart
                     style: TextStyle(fontSize: 20),
                   ),
                 )

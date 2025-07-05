@@ -1,6 +1,7 @@
 // import packages/modules
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:note_taking_app/core/constants.dart';
 import 'package:note_taking_app/data/services/firebase_service.dart';
 import 'package:note_taking_app/utils/validators.dart';
 
@@ -46,7 +47,7 @@ class _SignupScreenState extends State<SignupScreen> {
       (error) => _showSnackBar(error),
       (success) async {
         _showSnackBar('Signup successful. Please log in.', isSuccess: true);
-        await Future.delayed(const Duration(seconds: 1)); // Wait before navigating
+        await Future.delayed(const Duration(seconds: 1)); // Wait a little before navigating
         if (!mounted) return;
         Navigator.pushReplacementNamed(context, 'login');
       },
@@ -60,7 +61,7 @@ class _SignupScreenState extends State<SignupScreen> {
     final snackBar = SnackBar(
       content: Text(message),
       duration: const Duration(seconds: 1),
-      backgroundColor: isSuccess ? Colors.green : Colors.red,
+      backgroundColor: isSuccess ? kSuccessColor : kErrorColor,
       behavior: SnackBarBehavior.fixed,
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -92,6 +93,7 @@ class _SignupScreenState extends State<SignupScreen> {
           ),
           backgroundColor: Colors.blueGrey[900],
         ),
+
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Form(
