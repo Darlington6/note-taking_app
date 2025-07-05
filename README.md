@@ -68,7 +68,7 @@ lib/
 4. Run the App
 
 `flutter run`
-- Or use the run button (looks like a triangle at the top right) in the main.dart file
+- Or use the `run` button (looks like a triangle at the top right) in the main.dart file
 
 ---
 
@@ -83,7 +83,7 @@ lib/
 ## Dart Analyzer
 
 The app passes all static analysis checks:
-`dart analyze`
+- `dart analyze`
 - Analyzing note_taking_app...
 - No issues found!
 
@@ -91,6 +91,7 @@ The app passes all static analysis checks:
 
 ## Architecture Diagram
 
+```bash
 +---------------+         +-------------------------+
 |   UI Layer    | <-----> | FirebaseService (Auth)  |
 |  (Screens)    |         | FirebaseService (CRUD)  |
@@ -100,7 +101,7 @@ The app passes all static analysis checks:
 +------------------+
 |   Firestore DB   |
 +------------------+
-
+```
 ---
 
 ## Screenshots (Portrait vs. Landscape)
